@@ -32,7 +32,6 @@ export function Header({
         zIndex: 100,
         opacity: isRunning ? 0.4 : 1,
         background: '#000000',
-        background: '#000000',
         transition: 'opacity 0.5s ease',
       }}
       className={isRunning ? 'hide-on-mobile-when-running' : ''}

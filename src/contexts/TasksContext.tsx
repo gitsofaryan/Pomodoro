@@ -46,10 +46,12 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     if (!user || !supabase) return;
 
     const loadTasks = async () => {
-      const { data, error } = await supabase
+      if (!supabase) return;
+
+      const { data, error } = await supabase!
         .from('tasks')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', (user as any).id)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -90,7 +92,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         created_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('tasks')
         .insert(newTaskData)
         .select()
@@ -141,7 +143,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       // Map other fields as needed, though typical updates are title, estimates, color from UI
 
       if (Object.keys(dbUpdates).length > 0) {
-        supabase.from('tasks').update(dbUpdates).eq('id', id).then(({ error }) => {
+        supabase!.from('tasks').update(dbUpdates).eq('id', id).then(({ error }: { error: any }) => {
           if (error) console.error('Error updating task:', error);
         });
       }
@@ -152,7 +154,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     setTasks(prev => prev.filter(task => task.id !== id));
 
     if (user && supabase) {
-      supabase.from('tasks').delete().eq('id', id).then(({ error }) => {
+      supabase!.from('tasks').delete().eq('id', id).then(({ error }: { error: any }) => {
         if (error) console.error('Error deleting task:', error);
       });
     }
@@ -174,10 +176,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
           };
 
           if (user && supabase) {
-            supabase.from('tasks').update({
+            supabase!.from('tasks').update({
               is_completed: isNowComplete,
               completed_at: isNowComplete ? new Date().toISOString() : null
-            }).eq('id', id).then(({ error }) => {
+            }).eq('id', id).then(({ error }: { error: any }) => {
               if (error) console.error('Error toggling task complete:', error);
             });
           }
@@ -202,10 +204,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     );
 
     if (user && supabase) {
-      supabase.from('tasks').update({
+      supabase!.from('tasks').update({
         completed_pomodoros: newCount // This might be stale if strict concurrency, but ok for this app
         // Safer way is using sql rpc or assuming single user session active
-      }).eq('id', id).then(({ error }) => {
+      }).eq('id', id).then(({ error }: { error: any }) => {
         if (error) console.error('Error incrementing task pomodoro:', error);
       });
     }
@@ -216,7 +218,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     setTasks(prev => prev.filter(task => !task.isCompleted));
 
     if (user && supabase && completedIds.length > 0) {
-      supabase.from('tasks').delete().in('id', completedIds).then(({ error }) => {
+      supabase!.from('tasks').delete().in('id', completedIds).then(({ error }: { error: any }) => {
         if (error) console.error('Error clearing completed tasks:', error);
       });
     }

@@ -8,6 +8,7 @@ import { AuthModal } from './components/Auth/AuthModal';
 import { TaskPanel } from './components/Tasks/TaskPanel';
 import { AmbientSoundProvider } from './contexts/AmbientSoundContext';
 import { AmbientSoundPanel } from './components/AmbientSound/AmbientSoundPanel';
+import { SpotifyPanel } from './components/Spotify/SpotifyPanel';
 
 function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
@@ -15,6 +16,7 @@ function AppContent() {
   const [showAuth, setShowAuth] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showAmbient, setShowAmbient] = useState(false);
+  const [showSpotify, setShowSpotify] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
 
   const { isRunning, isPaused, start, pause, resume, reset, skip, mode, timeLeft, setMode, adjustTime } = useTimer();
@@ -115,17 +117,23 @@ function AppContent() {
           onOpenAuth={() => setShowAuth(true)}
           onOpenTasks={() => setShowTasks(true)}
           onOpenAmbient={() => setShowAmbient(true)}
+          onOpenSpotify={() => setShowSpotify(true)}
         />
       )}
 
       <Timer isFocusMode={isFocusMode} />
 
       {/* All Modals */}
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onOpenSpotify={() => setShowSpotify(true)}
+      />
       <StatsModal isOpen={showStats} onClose={() => setShowStats(false)} />
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
       <TaskPanel isOpen={showTasks} onClose={() => setShowTasks(false)} />
       <AmbientSoundPanel isOpen={showAmbient} onClose={() => setShowAmbient(false)} />
+      <SpotifyPanel isOpen={showSpotify} onClose={() => setShowSpotify(false)} />
     </div>
   );
 }

@@ -1,20 +1,32 @@
 import { useState } from 'react';
 import { Modal } from '../UI';
-import { useSettings } from '../../contexts';
+import { useSettings, useAuth } from '../../contexts';
 import { THEME_COLORS, TIMER_PRESETS, ThemeColor } from '../../types';
+import { Copy, Check, LogOut, Music } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenSpotify?: () => void;
 }
 
-export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, onOpenSpotify }: SettingsModalProps) {
   const { settings, updateTimerSettings, updateSettings, resetSettings } = useSettings();
+  const { user, signOut } = useAuth();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleReset = () => {
     resetSettings();
     setShowConfirm(false);
+  };
+
+  const copyUserId = () => {
+    if (user) {
+      navigator.clipboard.writeText(user.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -164,6 +176,109 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             />
           </SettingsRow>
         </SettingsSection>
+
+        {/* Integrations Section */}
+        <SettingsSection title="Integrations">
+          <SettingsRow
+            label="Spotify"
+            hint="Control music while focusing"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                onOpenSpotify?.();
+                onClose();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                background: '#1DB954',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#ffffff',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
+              <Music size={14} />
+              Connect
+            </button>
+          </SettingsRow>
+        </SettingsSection>
+
+        {/* Account Section - Only if signed in */}
+        {user && (
+          <SettingsSection title="Account">
+            <SettingsRow label="Name">
+              <span style={{ color: '#888888', fontSize: '13px' }}>
+                {user.user_metadata?.display_name || 'No name set'}
+              </span>
+            </SettingsRow>
+            <SettingsRow label="Email">
+              <span style={{ color: '#888888', fontSize: '13px' }}>
+                {user.email}
+              </span>
+            </SettingsRow>
+            <SettingsRow label="User ID">
+              <div
+                onClick={copyUserId}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: '#666666',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  background: 'rgba(255,255,255,0.03)',
+                  borderRadius: '6px',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#ffffff'}
+                onMouseLeave={e => e.currentTarget.style.color = '#666666'}
+              >
+                <code style={{ fontFamily: 'monospace' }}>{user.id.slice(0, 8)}...</code>
+                {copied ? <Check size={12} color="#22c55e" /> : <Copy size={12} />}
+              </div>
+            </SettingsRow>
+            <div style={{ padding: '14px 24px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  onClose();
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '12px',
+                  background: 'rgba(255, 68, 68, 0.1)',
+                  border: '1px solid rgba(255, 68, 68, 0.2)',
+                  borderRadius: '10px',
+                  color: '#ff4444',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 68, 68, 0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'}
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          </SettingsSection>
+        )}
 
         {/* Reset */}
         <div style={{ padding: '20px 24px', height: '24px', display: 'flex', alignItems: 'center' }}>
